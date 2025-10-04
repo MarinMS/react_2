@@ -1,25 +1,57 @@
-import Profile from "./Profile/Profile";
-import userData from "../userData.json";
-import friends from "../friends.json";
-import FriendList from "./FriendList/FriendList";
-import transactions from "../transactions.json";
-import TransactionHistory from "./TransactionHistory/TransactionHistory";
+import { useState, useEffect } from "react";
+import Description from "./Description/Description";
+import Feedback from "./Feedback/Feedback";
+import Options from "./Options/Options";
+import Notification from "./Notification/Notification";
+
+const STORAGE_KEY = "feedbackData";
 
 export default function App() {
+  const [feedback, setFeedback] = useState(() => {
+    const dataParsed = localStorage.getItem(STORAGE_KEY);
+    if (dataParsed) {
+      try {
+        return JSON.parse(dataParsed);
+      } catch (e) {
+        console.error("Parsing error:", e);
+      }
+    }
+    return { good: 0, neutral: 0, bad: 0 };
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(feedback));
+  }, [feedback]);
+
+  const updateFeedback = (type) => {
+    if (type === "reset") {
+      setFeedback({ good: 0, neutral: 0, bad: 0 });
+    } else {
+      setFeedback((prev) => ({
+        ...prev,
+        [type]: prev[type] + 1,
+      }));
+    }
+  };
+
+  const total = feedback.good + feedback.bad + feedback.neutral;
+  const positivePercent = total ? Math.round((feedback.good / total) * 100) : 0;
+
   return (
-    <div>
-      <h2>Завдання 1 - Профіль соціальної мережі</h2>
-      <Profile
-        name={userData.username}
-        tag={userData.tag}
-        location={userData.location}
-        image={userData.avatar}
-        stats={userData.stats}
-      />
-      <h2>Завдання 2 - Список друзів</h2>
-      <FriendList frinends={friends} />
-      <h2>Завдання 3 - Історія транзакцій</h2>
-      <TransactionHistory items={transactions} />
-    </div>
+    <>
+      <Description />
+      <Options onFeedback={updateFeedback} showReset={total > 0} />
+      {total > 0 ? (
+        <Feedback
+          good={feedback.good}
+          neutral={feedback.neutral}
+          bad={feedback.bad}
+          total={total}
+          positive={positivePercent}
+        />
+      ) : (
+        <Notification message="No feedback yet" />
+      )}
+    </>
   );
 }

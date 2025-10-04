@@ -1,0 +1,19 @@
+.container {
+  display: flex;
+  gap: 25px;
+  margin: 20px 25px;
+}
+
+.btn {
+  padding: 10px 15px;
+  background-color: rgb(164, 97, 226);
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 18px;
+  color: black;
+}
+
+.btn:hover {
+  background-color: blueviolet;
+}
